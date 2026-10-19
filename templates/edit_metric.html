@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Edit metrics · MarketingPilot{% endblock %}
+{% block heading %}Edit metrics{% endblock %}
+{% block content %}
+<div class="page-intro"><p>Correct the recorded campaign figures and notes.</p></div>
+{% if request.query_params.get('error') == 'campaign' %}<section class="notice">Choose a campaign that belongs to the selected client.</section>{% endif %}
+<section class="panel">
+  <form action="/metrics/{{ metric.id }}/edit" method="post" class="form-grid">
+    <label>Client *<select name="client_id" required>{% for client in clients %}<option value="{{ client.id }}" {% if client.id == metric.client_id %}selected{% endif %}>{{ client.business_name }}</option>{% endfor %}</select></label>
+    <label>Campaign<select name="campaign_id"><option value="">No campaign</option>{% for campaign in campaigns %}{% if campaign.client_id == metric.client_id %}<option value="{{ campaign.id }}" {% if campaign.id == metric.campaign_id %}selected{% endif %}>{{ campaign.name }}</option>{% endif %}{% endfor %}</select></label>
+    <label>Report date *<input type="date" name="report_date" required value="{{ metric.report_date }}"></label>
+    <label>Platform<select name="platform" required>{% for platform in ['Instagram','Facebook','WhatsApp','Google Ads'] %}<option {% if platform == metric.platform %}selected{% endif %}>{{ platform }}</option>{% endfor %}</select></label>
+    <label>Reach / impressions<input type="number" min="0" name="reach" value="{{ metric.reach }}"></label>
+    <label>Clicks<input type="number" min="0" name="clicks" value="{{ metric.clicks }}"></label>
+    <label>Leads<input type="number" min="0" name="leads" value="{{ metric.leads }}"></label>
+    <label>Ad spend (₹)<input type="number" min="0" step="0.01" name="spend" value="{{ metric.spend }}"></label>
+    <label class="full">Notes<input name="notes" value="{{ metric.notes }}"></label>
+    <div class="full form-foot"><a class="button secondary-link" href="/reports">Cancel</a><button class="button" type="submit">Save metrics</button></div>
+  </form>
+</section>
+{% endblock %}

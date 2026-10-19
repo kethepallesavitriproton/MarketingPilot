@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Sign in · MarketingPilot</title><link rel="stylesheet" href="/static/style.css"></head>
+<body class="login-page"><main class="login-card"><a class="brand" href="/">✦ MarketingPilot</a><h1>Sign in</h1><p>Enter the local workspace password to continue.</p>
+{% if login_error == 'invalid' %}<div class="notice">That password didn’t match. Try again.</div>{% elif login_error == 'locked' %}<div class="notice">Too many incorrect attempts. Wait ten minutes, then try again.</div>{% endif %}
+<form action="/login" method="post"><input type="hidden" name="next_path" value="{{ next_path }}"><label for="password">Workspace password</label><input id="password" type="password" name="password" autocomplete="current-password" required autofocus><button class="button" type="submit">Sign in</button></form>
+<small>This password protects access to the local MarketingPilot workspace.</small></main></body></html>

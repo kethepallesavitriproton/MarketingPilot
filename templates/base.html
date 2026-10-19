@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}MarketingPilot{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/">✦ MarketingPilot</a>
+    <nav><a href="/">Overview</a><a href="/campaigns">Campaigns</a><a href="/creatives">Image studio</a><a href="/content">Content planner</a><a href="/calendar">Calendar</a><a href="/leads">Leads</a><a href="/reports">Reports</a><a href="/connections">Connections</a></nav>
+    <div class="side-note"><span class="dot"></span> Local workspace<br><small>Your data stays on this computer.</small></div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div><span class="eyebrow">MARKETING WORKSPACE</span><h1>{% block heading %}Overview{% endblock %}</h1></div><div class="topbar-actions"><span class="local-pill">● Local prototype</span>{% if request.session.get('authenticated') %}<form action="/logout" method="post"><button class="small-button secondary" type="submit">Log out</button></form>{% endif %}</div></header>
+    {% block content %}{% endblock %}
+    <footer>MarketingPilot MVP · Plan, create, and manage digital marketing across channels.</footer>
+  </main>
+</body></html>

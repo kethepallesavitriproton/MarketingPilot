@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Connections · MarketingPilot{% endblock %}
+{% block heading %}Connections{% endblock %}
+{% block content %}
+<div class="page-intro"><p>Manage the platform links MarketingPilot will use for each client. A client must authorize their own business assets; access is never shared between clients.</p></div>
+{% if meta_message %}<section class="notice connection-message">{{ meta_message }}{% if request.query_params.get('stage') %}<br><small>Failed during: {{ request.query_params.get('stage') }}{% if request.query_params.get('code') %} · Meta error code {{ request.query_params.get('code') }}{% endif %}.</small>{% endif %}</section>{% endif %}
+
+<section class="panel">
+  <div class="panel-head"><div><h3>Meta platforms</h3><p>Connect each client's Facebook Page and, when enabled, its linked Instagram professional account.</p></div><span class="status {% if meta_ready %}status-approved{% endif %}">{% if meta_ready %}Ready to connect{% else %}Setup needed{% endif %}</span></div>
+  <div class="connection-readiness">
+    <article class="readiness-item"><span>Developer app role</span><strong class="ready">Administrator confirmed</strong><small>Your Meta screenshot shows your account as an app administrator.</small></article>
+    <article class="readiness-item"><span>App ID in local settings</span><strong class="{{ 'ready' if meta_app_id_ready else 'pending' }}">{{ 'Configured' if meta_app_id_ready else 'Not configured' }}</strong><small>The ID is read from the server environment and is not displayed here.</small></article>
+    <article class="readiness-item"><span>App secret in local settings</span><strong class="{{ 'ready' if meta_app_secret_ready else 'pending' }}">{{ 'Configured' if meta_app_secret_ready else 'Not configured' }}</strong><small>The secret is never shown in the page.</small></article>
+    <article class="readiness-item"><span>Graph API version</span><strong class="{{ 'ready' if meta_api_version_ready else 'pending' }}">{{ 'Configured' if meta_api_version_ready else 'Not configured' }}</strong><small>Read from the local .env file.</small></article>
+    <article class="readiness-item"><span>Token encryption key</span><strong class="{{ 'ready' if meta_encryption_key_ready else 'pending' }}">{{ 'Configured' if meta_encryption_key_ready else 'Not configured' }}</strong><small>Needed to encrypt client Page tokens at rest.</small></article>
+    <article class="readiness-item"><span>Workspace access protection</span><strong class="{{ 'ready' if meta_access_protection_ready else 'pending' }}">{{ 'Enabled' if meta_access_protection_ready else 'Not enabled' }}</strong><small>Set APP_PASSWORD and APP_SESSION_SECRET before exposing the app.</small></article>
+    <article class="readiness-item"><span>Secure HTTPS callback</span><strong class="{{ 'ready' if meta_https_callback_ready else 'pending' }}">{{ 'Configured' if meta_https_callback_ready else 'Required' }}</strong><small>Facebook rejected the current local HTTP callback; use a reachable HTTPS address.</small></article>
+  </div>
+  <div class="notice connection-note"><strong>Meta callback URL:</strong> <code>{{ meta_redirect_uri }}</code><br>Once this is an HTTPS address, add the exact value to your Meta app's Facebook Login OAuth redirect URI settings. MarketingPilot uses it only to finish authorization; it does not publish posts automatically.</div>
+  <p class="setup-hint">Meta authorization stays disabled until the HTTPS callback and workspace password protection are configured. Instagram publishing is {{ 'enabled' if meta_instagram_enabled else 'off' }}. To enable it, add the Instagram API use case and permissions in your Meta developer app, set <code>META_INSTAGRAM_ENABLED=1</code> in your private <code>.env</code>, restart, then reconnect the client. Never paste your app secret, workspace password, session secret, or encryption key into chat.</p>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><div><h3>Client connections</h3><p>Each business connects the Facebook Page it owns or manages. Instagram publishing requires an account linked to that Page.</p></div></div>
+  {% if clients %}
+  <div class="table-wrap"><table><thead><tr><th>Business</th><th>Facebook Page</th><th>Instagram account</th><th>Connection</th></tr></thead><tbody>
+  {% for client in clients %}{% set meta = connected.get(client.id) %}<tr><td><strong>{{ client.business_name }}</strong></td><td>{% if meta %}{{ meta.page_name }}{% else %}Not connected{% endif %}</td><td>{% if meta and meta.instagram_account_id %}@{{ meta.instagram_username or 'Professional account linked' }}{% elif meta_instagram_enabled %}Not linked{% else %}Publishing not enabled{% endif %}</td><td>{% if meta_ready %}<a class="button small-button" href="/integrations/meta/connect/{{ client.id }}">{% if meta %}Reconnect / change Page{% else %}Connect Facebook Page{% endif %}</a>{% else %}<span class="status">Setup required</span>{% endif %}</td></tr>{% endfor %}
+  </tbody></table></div>
+  {% else %}<div class="empty"><strong>No businesses added yet</strong><span>Add a business first; its platform access will be connected separately.</span><a class="text-link" href="/">Go to overview →</a></div>{% endif %}
+</section>
+
+<section class="panel">
+  <div class="panel-head"><div><h3>Other channels</h3><p>These connectors will be added after the Meta flow.</p></div></div>
+  <div class="channel-readiness"><article><strong>Google Ads</strong><span>Not connected</span></article><article><strong>WhatsApp</strong><span>Not connected</span></article></div>
+</section>
+<style>
+.connection-readiness{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.readiness-item{border:1px solid var(--line);border-radius:9px;padding:14px;display:grid;gap:6px}.readiness-item span,.channel-readiness span{font-size:11px;color:var(--muted)}.readiness-item strong{font-size:13px}.readiness-item small{font-size:10px;line-height:1.5;color:var(--muted)}.ready{color:#24764d}.pending{color:#a3631b}.connection-note{margin:15px 0 0}.setup-hint{font-size:11px;line-height:1.7;color:var(--muted)}.connection-message{margin-top:0}.channel-readiness{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.channel-readiness article{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:9px;padding:14px}.channel-readiness strong{font-size:12px}
+@media(max-width:700px){.connection-readiness{grid-template-columns:1fr}.channel-readiness{grid-template-columns:1fr}}
+</style>
+{% endblock %}

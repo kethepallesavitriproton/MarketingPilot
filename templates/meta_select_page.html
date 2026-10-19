@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Choose a Facebook Page · MarketingPilot{% endblock %}
+{% block heading %}Choose a Facebook Page{% endblock %}
+{% block content %}
+<div class="page-intro"><p>Choose the Page that belongs to <strong>{{ client.business_name }}</strong>. MarketingPilot will save only this business’s Page connection.</p></div>
+<section class="panel"><div class="panel-head"><div><h3>Available Pages</h3><p>If the client's Instagram Business or Creator account is linked to a Page, it will appear with that Page.</p></div></div>
+  <div class="page-options">{% for page in pages %}
+  <form action="/integrations/meta/select/{{ pending_id }}" method="post" class="page-option">
+    <input type="hidden" name="page_id" value="{{ page.id }}">
+    <div><strong>{{ page.name }}</strong><small>Facebook Page{% if page.instagram_username %} · Instagram @{{ page.instagram_username }}{% else %} · No eligible linked Instagram account detected{% endif %}</small></div>
+    <button class="button" type="submit">Connect this Page</button>
+  </form>
+  {% endfor %}</div>
+  <p class="prototype-note">The Page token is encrypted before it is saved. No post or ad is published by connecting an account.</p>
+</section>
+<style>.page-options{display:grid;gap:10px}.page-option{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border:1px solid var(--line);border-radius:9px}.page-option strong,.page-option small{display:block}.page-option strong{font-size:13px}.page-option small{font-size:10px;color:var(--muted);margin-top:5px}@media(max-width:600px){.page-option{align-items:flex-start;flex-direction:column}}</style>
+{% endblock %}

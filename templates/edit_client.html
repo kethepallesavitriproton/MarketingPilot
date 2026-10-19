@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Edit client · MarketingPilot{% endblock %}
+{% block heading %}Edit client{% endblock %}
+{% block content %}
+<div class="page-intro"><p>Keep the business profile and contact details current.</p></div>
+<section class="panel">
+  <form action="/clients/{{ client.id }}/edit" method="post" class="form-grid">
+    <label>Business name *<input name="business_name" required value="{{ client.business_name }}"></label>
+    <label>Business type<input name="niche" value="{{ client.niche }}"></label>
+    <label>Contact person<input name="contact_name" value="{{ client.contact_name }}"></label>
+    <label>Contact email<input name="contact_email" type="email" value="{{ client.contact_email }}"></label>
+    <label>Brand color<input type="color" name="brand_color" value="{{ client.brand_color }}"></label>
+    <label>Background color<input type="color" name="background_color" value="{{ client.background_color }}"></label>
+    <label class="full">Brand voice<input name="brand_voice" maxlength="200" value="{{ client.brand_voice }}" placeholder="e.g. Warm, confident, locally focused"></label>
+    <label class="full">Products and services<textarea name="products_services" rows="3" maxlength="1000" placeholder="What the business offers; separate items with commas">{{ client.products_services }}</textarea></label>
+    <label class="full">Notes<textarea name="notes" rows="4">{{ client.notes }}</textarea></label>
+    <div class="full form-foot"><a class="button secondary-link" href="/">Cancel</a><button class="button" type="submit">Save client</button></div>
+  </form>
+</section>
+{% endblock %}

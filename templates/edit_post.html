@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Edit content · MarketingPilot{% endblock %}
+{% block heading %}Edit content{% endblock %}
+{% block content %}
+<div class="page-intro"><p>Update this draft or its planned publishing details. Saving changes does not publish anything.</p></div>
+{% if request.query_params.get('error') == 'campaign' %}<section class="notice">Choose a campaign that belongs to the selected client.</section>{% endif %}
+{% if request.query_params.get('error') == 'asset' %}<section class="notice">Choose an image created for the selected client.</section>{% endif %}
+{% if request.query_params.get('error') == 'feedback' %}<section class="notice">Keep client review feedback under 2,000 characters.</section>{% endif %}{% if request.query_params.get('error') == 'time' %}<section class="notice">Enter a valid planned time.</section>{% endif %}
+<section class="panel">
+  <form action="/posts/{{ post.id }}/edit" method="post" class="form-grid">
+    <label>Client *<select name="client_id" id="post-client" required>{% for client in clients %}<option value="{{ client.id }}" {% if client.id == post.client_id %}selected{% endif %}>{{ client.business_name }}</option>{% endfor %}</select></label>
+    <label>Campaign<select name="campaign_id"><option value="">No campaign</option>{% for campaign in campaigns %}{% if campaign.client_id == post.client_id %}<option value="{{ campaign.id }}" {% if campaign.id == post.campaign_id %}selected{% endif %}>{{ campaign.name }}</option>{% endif %}{% endfor %}</select></label>
+    <label>Platform *<select name="platform" required>{% for platform in ['Instagram','Facebook','WhatsApp','Google Ads'] %}<option {% if platform == post.platform %}selected{% endif %}>{{ platform }}</option>{% endfor %}</select></label>
+    <label>Reuse an image (optional)<select name="asset_path" id="post-asset"><option value="">No image</option>{% for asset in assets %}<option value="{{ asset.asset_path }}" data-client="{{ asset.client_id }}" {% if asset.asset_path == post.asset_path %}selected{% endif %}>{{ asset.business_name }} · {{ asset.caption[:44] }}</option>{% endfor %}</select></label>
+    <label>Planned date<input type="date" name="scheduled_date" value="{{ post.scheduled_date }}"></label>
+    <label>Planned time (optional)<input type="time" name="scheduled_time" value="{{ post.scheduled_time }}"></label>
+    <label>Status<select name="status" required>{% for status in ['Draft','Needs approval','Approved','Scheduled','Published'] %}<option {% if status == post.status %}selected{% endif %}>{{ status }}</option>{% endfor %}</select></label>
+    <label class="full">Caption or ad copy *<textarea name="caption" rows="7" required>{{ post.caption }}</textarea></label>
+    <label class="full">Client review feedback (optional)<textarea name="client_feedback" rows="4" maxlength="2000" placeholder="Record the client’s approval notes or requested changes.">{{ post.client_feedback }}</textarea><small>If the content changes, old feedback is cleared unless you enter updated feedback.</small></label>
+    <div class="full form-foot"><a class="button secondary-link" href="/content">Cancel</a><button class="button" type="submit">Save changes</button></div>
+  </form>
+</section>
+<script>const postClient=document.getElementById('post-client');if(postClient){const assetSelect=document.getElementById('post-asset');const syncAssets=(reset=false)=>{if(reset)assetSelect.value='';[...assetSelect.options].forEach(option=>{if(option.dataset.client){option.hidden=option.dataset.client!==postClient.value;if(option.selected&&option.hidden)assetSelect.value=''}})};postClient.addEventListener('change',()=>syncAssets(true));syncAssets();}</script>
+{% endblock %}

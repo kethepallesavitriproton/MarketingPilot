@@ -1,0 +1,68 @@
+{% extends "base.html" %}{% block title %}Image studio · MarketingPilot{% endblock %}{% block heading %}Image studio{% endblock %}
+{% block content %}
+<div class="page-intro"><p>Create a branded square graphic for a client’s campaign. Each design is saved as a draft in the content planner for review.</p></div>
+{% if created %}<section class="notice"><strong>Your image is ready.</strong> It has been saved with draft(s) for {{ created }} channel(s), using the same graphic. <a href="/content">Open content planner →</a></section>{% endif %}
+{% if clients %}<section class="panel"><div class="panel-head"><div><h3>Create a campaign image</h3><p>Use the client’s offer, audience, and brand colors to shape the message.</p></div><span class="mini-icon">▧</span></div>
+<form action="/creatives" method="post" class="form-grid" id="creative-form">
+<label>Client *<select name="client_id" id="creative-client" required>{% for client in clients %}<option value="{{ client.id }}" data-brand="{{ client.brand_color }}" data-background="{{ client.background_color }}" data-voice="{{ client.brand_voice }}" data-products="{{ client.products_services }}">{{ client.business_name }}</option>{% endfor %}</select></label>
+<label>Campaign<select name="campaign_id" id="creative-campaign"><option value="">No campaign</option>{% for campaign in campaigns %}<option value="{{ campaign.id }}" data-client="{{ campaign.client_id }}" data-goal="{{ campaign.goal }}" data-audience="{{ campaign.audience }}" data-needs="{{ campaign.audience_needs }}" data-interests="{{ campaign.audience_interests }}" data-location="{{ campaign.location }}" data-offer="{{ campaign.offer }}" data-cta="{{ campaign.call_to_action }}">{{ campaign.client_name }} · {{ campaign.name }}</option>{% endfor %}</select></label>
+<label>Primary channel<select name="platform" id="creative-primary-platform"><option>Instagram</option><option>Facebook</option><option>WhatsApp</option><option>Google Ads</option></select></label>
+<div class="full"><strong class="channel-label">Also create drafts for</strong><div class="checkbox-row creative-channels">{% for channel in ['Instagram','Facebook','WhatsApp','Google Ads'] %}<label><input type="checkbox" name="additional_platforms" value="{{ channel }}"> {{ channel }}</label>{% endfor %}</div></div>
+<label>Image format<select name="image_format"><option>Square (1080 × 1080)</option><option>Vertical (1080 × 1920)</option><option>Landscape (1200 × 628)</option></select></label>
+<label>Headline *<input name="headline" maxlength="100" required placeholder="Main message or offer"></label>
+<label class="full">Supporting message<input name="message" id="creative-message" maxlength="180" placeholder="Short detail tailored to this audience"><small id="products-services-hint" class="brand-voice-hint"></small><button class="button secondary" type="button" id="insert-products">Insert products/services</button></label>
+<div class="full"><small id="campaign-context-hint" class="brand-voice-hint"></small><button class="button secondary" type="button" id="insert-campaign-context">Use campaign details in message and CTA</button></div>
+<label>Call to action<input name="call_to_action" id="creative-cta" maxlength="60" value="Learn more"></label>
+<label>Brand color<input id="creative-brand" type="color" name="brand_color" value="{{ clients[0].brand_color }}"></label>
+<label>Background color<input id="creative-background" type="color" name="background_color" value="{{ clients[0].background_color }}"></label>
+<div class="full"><small id="brand-voice-hint" class="brand-voice-hint"></small><button class="button" type="submit">Create image and draft post</button></div></form></section>{% else %}<section class="notice"><strong>Add a client first.</strong> <a href="/">Go to overview →</a></section>{% endif %}
+<section class="panel"><div class="panel-head"><div><h3>Created images</h3><p>{{ creatives|length }} image(s)</p></div></div>{% if creatives %}<div class="creative-grid">{% for creative in creatives %}<article class="creative-card"><img src="{{ creative.asset_path }}" alt="Campaign graphic for {{ creative.business_name }}"><div><strong>{{ creative.business_name }}</strong><small>{{ creative.platform }} · {{ creative.caption }}</small><a class="png-download" href="{{ creative.asset_path }}" data-filename="{{ creative.business_name }}">Download PNG</a><a href="/posts/{{ creative.id }}/edit">Edit draft post</a></div></article>{% endfor %}</div>{% else %}<div class="empty"><div>▧</div><strong>No images created</strong><span>Create a client-specific graphic to get started.</span></div>{% endif %}</section>
+<style>.creative-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}.creative-card{border:1px solid #e5ebe7;border-radius:10px;overflow:hidden;background:#fff}.creative-card img{display:block;width:100%;max-height:360px;height:auto;object-fit:contain;background:#f3f6f3}.creative-card>div{display:grid;gap:7px;padding:12px}.creative-card strong{font-size:12px}.creative-card small,.brand-voice-hint{font-size:10px;line-height:1.5;color:#78847e;max-height:3em;overflow:hidden}.creative-card a{font-size:10px;font-weight:700;color:#1c7552;text-decoration:none}.form-grid input[type=color]{height:40px;padding:4px}.brand-voice-hint{display:block;margin-bottom:9px}.channel-label{display:block;font-size:11px;color:#526057;margin-bottom:7px}.creative-channels{display:flex;gap:15px;flex-wrap:wrap}.creative-channels label{display:flex;align-items:center;flex-direction:row;gap:5px}.creative-channels input{width:auto}</style>
+<script>const clientSelect=document.getElementById('creative-client');if(clientSelect){const brandInput=document.getElementById('creative-brand');const backgroundInput=document.getElementById('creative-background');const voiceHint=document.getElementById('brand-voice-hint');const productsHint=document.getElementById('products-services-hint');const campaignHint=document.getElementById('campaign-context-hint');const messageInput=document.getElementById('creative-message');const ctaInput=document.getElementById('creative-cta');const insertProducts=document.getElementById('insert-products');const insertCampaign=document.getElementById('insert-campaign-context');const campaignSelect=document.getElementById('creative-campaign');const selectedCampaign=()=>campaignSelect?.selectedOptions[0];const syncCampaign=()=>{const campaign=selectedCampaign();const context=[campaign?.dataset.goal,campaign?.dataset.offer,campaign?.dataset.audience,campaign?.dataset.needs,campaign?.dataset.interests,campaign?.dataset.location].filter(Boolean);campaignHint.textContent=campaign?.value?'Campaign context: '+(context.join(' · ')||'No goal, offer, or audience details saved yet.')+(campaign.dataset.cta?' · CTA: '+campaign.dataset.cta:''):'Select a campaign to use its goal, offer, and audience details.';insertCampaign.disabled=!campaign?.value||context.length===0};const syncBrand=()=>{const option=clientSelect.selectedOptions[0];brandInput.value=option.dataset.brand||'#1c7552';backgroundInput.value=option.dataset.background||'#e9f5ee';voiceHint.textContent=option.dataset.voice?'Brand voice: '+option.dataset.voice:'';const products=option.dataset.products||'';productsHint.textContent=products?'Profile products/services: '+products:'No products/services saved on this client profile.';insertProducts.disabled=!products;if(campaignSelect){campaignSelect.value='';[...campaignSelect.options].forEach(item=>{if(item.dataset.client)item.hidden=item.dataset.client!==clientSelect.value})}syncCampaign()};insertProducts.addEventListener('click',()=>{const products=clientSelect.selectedOptions[0].dataset.products||'';if(products){messageInput.value=products.slice(0,180);messageInput.focus()}});insertCampaign.addEventListener('click',()=>{const campaign=selectedCampaign();if(!campaign?.value)return;const parts=[campaign.dataset.offer,campaign.dataset.audience,campaign.dataset.needs,campaign.dataset.interests,campaign.dataset.location].filter(Boolean);messageInput.value=parts.join(' · ').slice(0,180);if(campaign.dataset.cta)ctaInput.value=campaign.dataset.cta;messageInput.focus()});campaignSelect.addEventListener('change',syncCampaign);clientSelect.addEventListener('change',syncBrand);syncBrand();}</script>
+<script>const primaryCreativePlatform=document.getElementById('creative-primary-platform');if(primaryCreativePlatform){const syncCreativeChannels=()=>{document.querySelectorAll('input[name="additional_platforms"]').forEach(input=>{const isPrimary=input.value===primaryCreativePlatform.value;input.disabled=isPrimary;if(isPrimary)input.checked=false;input.closest('label').style.opacity=isPrimary?'.5':'1'})};primaryCreativePlatform.addEventListener('change',syncCreativeChannels);syncCreativeChannels();}</script>
+<script>
+document.querySelectorAll('.png-download').forEach(link => {
+  link.addEventListener('click', async event => {
+    event.preventDefault();
+    let sourceUrl = '';
+    try {
+      const response = await fetch(link.href);
+      if (!response.ok) throw new Error('Image unavailable');
+      sourceUrl = URL.createObjectURL(await response.blob());
+      const image = new Image();
+      image.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = image.naturalWidth || 1080;
+        canvas.height = image.naturalHeight || 1080;
+        const context = canvas.getContext('2d');
+        if (!context) {
+          URL.revokeObjectURL(sourceUrl);
+          window.open(link.href, '_blank', 'noopener');
+          return;
+        }
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(png => {
+          URL.revokeObjectURL(sourceUrl);
+          if (!png) { window.open(link.href, '_blank', 'noopener'); return; }
+          const downloadUrl = URL.createObjectURL(png);
+          const download = document.createElement('a');
+          download.href = downloadUrl;
+          download.download = (link.dataset.filename || 'marketingpilot')
+            .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-creative.png';
+          download.click();
+          setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+        }, 'image/png');
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(sourceUrl);
+        window.open(link.href, '_blank', 'noopener');
+      };
+      image.src = sourceUrl;
+    } catch {
+      if (sourceUrl) URL.revokeObjectURL(sourceUrl);
+      window.open(link.href, '_blank', 'noopener');
+    }
+  });
+});
+</script>
+{% endblock %}
